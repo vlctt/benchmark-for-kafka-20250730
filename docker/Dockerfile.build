@@ -14,9 +14,28 @@
 
 # Build the Project
 FROM maven:3.9.9-eclipse-temurin-17 as build
+# 设置国内 Maven 仓库镜像
+RUN mkdir -p /root/.m2 && \
+    echo '<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" \
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" \
+      xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 \
+      http://maven.apache.org/xsd/settings-1.0.0.xsd"> \
+      <mirrors> \
+        <mirror> \
+          <id>aliyunmaven</id> \
+          <mirrorOf>*</mirrorOf> \
+          <name>Aliyun Maven</name> \
+          <url>https://maven.aliyun.com/repository/public</url> \
+        </mirror> \
+      </mirrors> \
+    </settings>' > /root/.m2/settings.xml
+
+
+
 COPY . /benchmark
 WORKDIR /benchmark
-RUN mvn install
+RUN mvn install -s /root/.m2/settings.xml
+
 
 # Create the benchmark image
 FROM eclipse-temurin:17
